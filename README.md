@@ -1,10 +1,12 @@
 # php-google-contacts-v3-api
 
-[![StyleCI](https://styleci.io/repos/38814668/shield)](https://styleci.io/repos/38814668)
-
 PHP library for the Google Contacts API (v3)
 
-## Installation & Dependencies
+This repository is forked from [rapidwebltd/php-google-contacts-v3-api](https://github.com/rapidwebltd/php-google-contacts-v3-api) and the following changes has been done 
+
+1. Code changes to Support PHP Google Api Client version greater than 2.0.0 and PHP version greater than 5.4
+
+## Dependencies
 
 its dependencies can be installed using `composer`. 
 
