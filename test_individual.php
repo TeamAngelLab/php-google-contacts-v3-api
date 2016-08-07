@@ -1,21 +1,55 @@
 <?php
 
-require_once '../../../vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
-use rapidweb\googlecontacts\factories\ContactFactory;
+use rajeshtomjoe\googlecontacts\factories\ContactFactory;
 
-if (!isset($_GET['selfURL'])) {
-    throw new Exception('No selfURL specified.');
+if (isset($_GET['selfURL'])) {
+    $contact = ContactFactory::getBySelfURL($_GET['selfURL']);
+
+	if(!empty($_POST['name']) && !empty($_POST['email']) && !empty($_POST['phoneNumber']))
+	{
+		$contact->name = $_POST['name'];
+		$contact->phoneNumber = $_POST['phoneNumber'];
+		$contact->email = $_POST['email'];
+
+		$contact = ContactFactory::submitUpdates($contact);
+		header('Location: test.php');
+		exit();
+	}else {
+		echo 'All fields required';
+	}
+}else {
+	if(!empty($_POST['name']) && !empty($_POST['email']) && !empty($_POST['phoneNumber']))
+	{
+		ContactFactory::create($_POST['name'],$_POST['phoneNumber'],$_POST['email']);
+		header('Location: test.php');
+		exit();
+	}else {
+		echo 'All fields required';
+	}
 }
 
-$contact = ContactFactory::getBySelfURL($_GET['selfURL']);
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>PHP library for the Google Contacts API (v3)</title>
 
-var_dump($contact);
-
-$contact->name = 'Test';
-$contact->phoneNumber = '07812363789';
-$contact->email = 'test@example.com';
-
-$contactAfterUpdate = ContactFactory::submitUpdates($contact);
-
-var_dump($contactAfterUpdate);
+  </head>
+  <body>
+    <form method="POST">
+    	<label>Name:</label><br>
+    	<input type="text" name="name" value="<?php echo !empty($contact->name)?$contact->name:'';?>"><br><br>
+    	<label>Phone Number:</label><br>
+    	<input type="text" name="phoneNumber" value="<?php echo !empty($contact->phoneNumber)?$contact->phoneNumber:'';?>"><br><br>
+    	<label>Email:</label><br>
+    	<input type="email" name="email" value="<?php echo !empty($contact->email)?$contact->email:'';?>"><br><br>
+      <button>Save</button>
+    </form>
+  </body>
+</html>

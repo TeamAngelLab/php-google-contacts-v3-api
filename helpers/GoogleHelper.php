@@ -1,6 +1,6 @@
 <?php
 
-namespace rapidweb\googlecontacts\helpers;
+namespace rajeshtomjoe\googlecontacts\helpers;
 
 abstract class GoogleHelper
 {
@@ -26,19 +26,22 @@ abstract class GoogleHelper
         'https://www.googleapis.com/auth/userinfo.email',
         'https://apps-apis.google.com/a/feeds/alias/',
         'https://apps-apis.google.com/a/feeds/user/',*/
+        'https://www.googleapis.com/auth/contacts.readonly',
         'https://www.google.com/m8/feeds/',
         /*'https://www.google.com/m8/feeds/user/',*/
         ));
 
+        $redirectUri = self::getBaseUrl().'/redirect-handler.php';
+
         $client->setClientId($config->clientID);
         $client->setClientSecret($config->clientSecret);
-        $client->setRedirectUri($config->redirectUri);
+        $client->setRedirectUri($redirectUri);
         $client->setAccessType('offline');
         $client->setApprovalPrompt('force');
         $client->setDeveloperKey($config->developerKey);
 
-        if (isset($config->refreshToken) && $config->refreshToken) {
-            $client->refreshToken($config->refreshToken);
+        if (isset($_SESSION['access_token'])) {
+            $client->setAccessToken($_SESSION['access_token']);
         }
 
         return $client;
@@ -51,11 +54,44 @@ abstract class GoogleHelper
 
     public static function authenticate(\Google_Client $client, $code)
     {
-        $client->authenticate($code);
+        return $client->fetchAccessTokenWithAuthCode($code);
     }
 
     public static function getAccessToken(\Google_Client $client)
     {
-        return json_decode($client->getAccessToken());
+        return json_encode($client->getAccessToken());
+    }
+
+    public static function getBaseUrl(){
+        // output: /myproject/index.php
+        $currentPath = $_SERVER['PHP_SELF']; 
+
+        // output: Array ( [dirname] => /myproject [basename] => index.php [extension] => php [filename] => index ) 
+        $pathInfo = pathinfo($currentPath); 
+
+        // output: localhost
+        $hostName = $_SERVER['HTTP_HOST']; 
+
+        // output: http://
+        $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https://'?'https://':'http://';
+
+        // return: http://localhost/myproject/
+        return $protocol.$hostName.$pathInfo['dirname'];
+    }
+
+    public static function getResponse($method,$url,$body = null){
+        $client = self::getClient();
+
+        $httpClient = new \GuzzleHttp\Client();
+        $httpClient = $client->authorize($httpClient);
+        $options = ['headers' => ['User-Agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; rv:1.7.3) Gecko/20041001 Firefox/0.10.1','Content-Type' => 'application/atom+xml; charset=UTF-8; type=feed']];
+        if(isset($body))
+        {
+            $options['body'] = $body;
+        }
+        $responseObj = $httpClient->request($method,$url,$options);        
+        $response = $responseObj->getBody()->getContents();
+
+        return $response;
     }
 }

@@ -1,21 +1,15 @@
 <?php
 
-namespace rapidweb\googlecontacts\factories;
+namespace rajeshtomjoe\googlecontacts\factories;
 
-use rapidweb\googlecontacts\helpers\GoogleHelper;
-use rapidweb\googlecontacts\objects\Contact;
+use rajeshtomjoe\googlecontacts\helpers\GoogleHelper;
+use rajeshtomjoe\googlecontacts\objects\Contact;
 
 abstract class ContactFactory
 {
     public static function getAll()
     {
-        $client = GoogleHelper::getClient();
-
-        $req = new \Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full?max-results=10000&updated-min=2007-03-16T00:00:00');
-
-        $val = $client->getAuth()->authenticatedRequest($req);
-
-        $response = $val->getResponseBody();
+        $response = GoogleHelper::getResponse('GET','https://www.google.com/m8/feeds/contacts/default/full?max-results=50');
 
         $xmlContacts = simplexml_load_string($response);
         $xmlContacts->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
@@ -74,13 +68,7 @@ abstract class ContactFactory
 
     public static function getBySelfURL($selfURL)
     {
-        $client = GoogleHelper::getClient();
-
-        $req = new \Google_Http_Request($selfURL);
-
-        $val = $client->getAuth()->authenticatedRequest($req);
-
-        $response = $val->getResponseBody();
+        $response = GoogleHelper::getResponse('GET', $selfURL);
 
         $xmlContact = simplexml_load_string($response);
         $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
@@ -121,14 +109,7 @@ abstract class ContactFactory
 
     public static function submitUpdates(Contact $updatedContact)
     {
-        $client = GoogleHelper::getClient();
-
-        $req = new \Google_Http_Request($updatedContact->selfURL);
-
-        $val = $client->getAuth()->authenticatedRequest($req);
-
-        $response = $val->getResponseBody();
-
+        $response = GoogleHelper::getResponse('GET', urldecode($updatedContact->selfURL));
         $xmlContact = simplexml_load_string($response);
         $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
 
@@ -151,14 +132,7 @@ abstract class ContactFactory
 
         $updatedXML = $xmlContactsEntry->asXML();
 
-        $req = new \Google_Http_Request($updatedContact->editURL);
-        $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
-        $req->setRequestMethod('PUT');
-        $req->setPostBody($updatedXML);
-
-        $val = $client->getAuth()->authenticatedRequest($req);
-
-        $response = $val->getResponseBody();
+        $response = GoogleHelper::getResponse('PUT', urldecode($updatedContact->editURL), $updatedXML);
 
         $xmlContact = simplexml_load_string($response);
         $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
@@ -221,16 +195,7 @@ abstract class ContactFactory
 
         $xmlToSend = $doc->saveXML();
 
-        $client = GoogleHelper::getClient();
-
-        $req = new \Google_Http_Request('https://www.google.com/m8/feeds/contacts/default/full');
-        $req->setRequestHeaders(array('content-type' => 'application/atom+xml; charset=UTF-8; type=feed'));
-        $req->setRequestMethod('POST');
-        $req->setPostBody($xmlToSend);
-
-        $val = $client->getAuth()->authenticatedRequest($req);
-
-        $response = $val->getResponseBody();
+        $response = GoogleHelper::getResponse('POST', 'https://www.google.com/m8/feeds/contacts/default/full', $xmlToSend);
 
         $xmlContact = simplexml_load_string($response);
         $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');

@@ -1,6 +1,6 @@
 <?php
 
-namespace rapidweb\googlecontacts\objects;
+namespace rajeshtomjoe\googlecontacts\objects;
 
 class Contact
 {

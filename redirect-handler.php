@@ -10,22 +10,16 @@ if (!isset($_GET['code'])) {
 
 $code = $_GET['code'];
 
-require_once '../../../vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
-use rapidweb\googlecontacts\helpers\GoogleHelper;
+use rajeshtomjoe\googlecontacts\helpers\GoogleHelper;
 
 $client = GoogleHelper::getClient();
 
-GoogleHelper::authenticate($client, $code);
+$accessToken = GoogleHelper::authenticate($client, $code);
 
-$accessToken = GoogleHelper::getAccessToken($client);
+$_SESSION['access_token'] = $accessToken;
 
-if (!isset($accessToken->refresh_token)) {
-    echo 'Google did not respond with a refresh token. You can still use the Google Contacts API, but you may to re-authorise your application in the future. ';
+header('Location: test.php');
 
-    echo 'Access token response:';
 
-    var_dump($accessToken);
-} else {
-    echo 'Refresh token is: '.$accessToken->refresh_token.' - Please add this to the config file.';
-}

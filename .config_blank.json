@@ -1,7 +1,5 @@
 {
     "clientID": "",
     "clientSecret": "",
-    "redirectUri": "",
-    "developerKey": "",
-    "refreshToken": ""
+    "developerKey": ""
 }
