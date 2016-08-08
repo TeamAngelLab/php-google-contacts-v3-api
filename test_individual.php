@@ -1,5 +1,10 @@
 <?php
 
+if(!isset($_SESSION['access_token'])){
+	header('Location: index.php');
+	exit;
+}
+
 require_once 'vendor/autoload.php';
 
 use rajeshtomjoe\googlecontacts\factories\ContactFactory;
